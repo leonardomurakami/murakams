@@ -45,9 +45,9 @@ export const initialFiles = [
   - 🐐 Studying goat farming
   
   Feel free to explore my files using the \`ls\` and \`cat\` commands!`),
-  new File('projects.md', `As with all my projects, this file is #TODO`),
+  new File('projects.md', `Just like all my projects, this file is #TODO`),
   new File('contact.json', JSON.stringify({
-      email: "leonardo.murakami@example.com",
+      email: "contato@murakams.com",
       linkedin: "https://linkedin.com/in/leonardo-murakami",
       github: "https://github.com/leonardomurakami"
     }, null, 2)),
