@@ -1,29 +1,29 @@
 class File {
-    constructor(name, content, createdAt = new Date(), modifiedAt = new Date()) {
-      this.name = name;
-      this.content = content;
-      this.createdAt = createdAt;
-      this.modifiedAt = modifiedAt;
-    }
-  
-    toJSON() {
-      return {
-        name: this.name,
-        content: this.content,
-        createdAt: this.createdAt.toISOString(),
-        modifiedAt: this.modifiedAt.toISOString()
-      };
-    }
-  
-    static fromJSON(json) {
-      return new File(
-        json.name,
-        json.content,
-        new Date(json.createdAt),
-        new Date(json.modifiedAt)
-      );
-    }
+  constructor(name, content, createdAt = new Date(), modifiedAt = new Date()) {
+    this.name = name;
+    this.content = content;
+    this.createdAt = createdAt;
+    this.modifiedAt = modifiedAt;
   }
+
+  toJSON() {
+    return {
+      name: this.name,
+      content: this.content,
+      createdAt: this.createdAt.toISOString(),
+      modifiedAt: this.modifiedAt.toISOString()
+    };
+  }
+
+  static fromJSON(json) {
+    return new File(
+      json.name,
+      json.content,
+      new Date(json.createdAt),
+      new Date(json.modifiedAt)
+    );
+  }
+}
   
 export const initialFiles = [
   new File('welcome.txt', 'Welcome to my terminal portfolio! Type "help" to see available commands.'),

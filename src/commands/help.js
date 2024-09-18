@@ -2,7 +2,7 @@ const help = () => {
     return `
   Available commands:
     ls [path]                  - List files in the specified directory (default: current directory)
-    cat <filename>             - Display the contents of a file
+    cat <filename>             - Display the contents of a file (autocomplete only works on the current directory for now)
     whoami                     - Display information about the user
     write <filename> <content> - Create or overwrite a file with the specified content
     rm <filename>              - Delete the specified file

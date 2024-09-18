@@ -2,122 +2,93 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled, { keyframes, css, createGlobalStyle } from 'styled-components';
 import { useGlitch } from 'react-powerglitch';
 
+const rgbShift = keyframes`
+  0% { text-shadow: 0.9px 0 1px rgb(0,255,0), -0.9px 0 1px rgb(255,0,255), 0 0 3px; }
+  50% { text-shadow: -0.9px 0 1px rgb(0,255,0), 0.9px 0 1px rgb(255,0,255), 0 0 3px; }
+  100% { text-shadow: 0.9px 0 1px rgb(0,255,0), -0.9px 0 1px rgb(255,0,255), 0 0 3px; }
+`;
+
 const scanlines = keyframes`
   0% { background-position: 0 0; }
   100% { background-position: 0 100%; }
 `;
 
-const rgbShift = keyframes`
-  0%, 100% { text-shadow: -1px 0 red, 1px 0 blue; }
-  25%, 75% { text-shadow: -1.5px 0 red, 1.5px 0 blue; }
-  50% { text-shadow: -2px 0 red, 2px 0 blue; }
-`;
-
-const renderLine = keyframes`
-  0% { top: 0%; }
-  100% { top: 100%; }
-`;
-
 const flicker = keyframes`
   0% { opacity: 0.99; }
-  25% { opacity: 0.987; }
-  50% { opacity: 0.985; }
-  50% { opacity: 0.987; }
+  5% { opacity: 0.96; }
+  10% { opacity: 0.99; }
+  15% { opacity: 0.96; }
+  20% { opacity: 0.99; }
+  55% { opacity: 0.98; }
+  60% { opacity: 0.99; }
+  75% { opacity: 0.96; }
+  80% { opacity: 0.99; }
   100% { opacity: 0.99; }
 `;
 
-const CRTEffectStyled = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
-  overflow: hidden;
-`;
-
-const CRTOverlay = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-              linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  background-size: 100% 2px, 3px 100%;
-  pointer-events: none;
-  opacity: 0.15;
-  mix-blend-mode: overlay;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      rgba(255, 255, 255, 0.1) 50%,
-      rgba(0, 0, 255, 0.1) 50%
-    );
-    background-size: 100% 3px;
-    opacity: 0.08;
-    animation: ${scanlines} 0.05s steps(1) infinite;
-  }
-`;
-
-const RenderLine = styled.div`
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-  animation: ${renderLine} 8s linear infinite;
-  z-index: 3;
-`;
-
-const GlitchContainer = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  ${props => props.isGlitching && css`
-    animation: ${rgbShift} 0.1s linear infinite;
+const CRTWrapper = styled.div`
+  position: relative;
+  animation: ${flicker} 0.15s infinite;
+  ${props => !props.isModern && css`
+    &::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      z-index: 2;
+      background-size: 100% 2px, 3px 100%;
+      pointer-events: none;
+    }
   `}
 `;
 
-const CRTCanvas = styled.canvas`
+const CRTContent = styled.div`
+  position: relative;
+  z-index: 1;
+  animation: ${rgbShift} 3s infinite linear;
+`;
+
+const Scanline = styled.div`
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.05;
-  mix-blend-mode: overlay;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0,0,0,0.2) 50%,
+    rgba(0,0,0,0.2)
+  );
+  background-size: 100% 4px;
+  animation: ${scanlines} 1s linear infinite;
+  opacity: 0.3;
+  z-index: 2;
+  pointer-events: none;
 `;
 
 const GlobalStyle = createGlobalStyle`
-  body {
-    animation: ${flicker} 0.15s infinite;
-  }
   * {
-    text-shadow: 0 0 1px #00ff00, 0 0 1px #00ff00;
+    animation: ${rgbShift} 3s infinite linear;
   }
 `;
 
 const CRTEffect = ({ children, isModern }) => {
+  // eslint-disable-next-line no-unused-vars
   const [isGlitching, setIsGlitching] = useState(false);
-  const canvasRef = useRef(null);
+  const glitchRef = useRef(null);
 
   const glitch = useGlitch({
     playMode: 'manual',
     createContainers: true,
     hideOverflow: false,
     timing: {
-      duration: 600,
+      duration: 1000,
       iterations: 1,
     },
     glitchTimeSpan: {
@@ -140,13 +111,19 @@ const CRTEffect = ({ children, isModern }) => {
   });
 
   useEffect(() => {
+    if (isModern) return;
+
     const triggerGlitch = () => {
       setIsGlitching(true);
-      glitch.startGlitch();
+      if (glitchRef.current && glitchRef.current.startGlitch) {
+        glitchRef.current.startGlitch();
+      }
       setTimeout(() => {
-        glitch.stopGlitch();
+        if (glitchRef.current && glitchRef.current.stopGlitch) {
+          glitchRef.current.stopGlitch();
+        }
         setIsGlitching(false);
-      }, 600);
+      }, 1000);
     };
 
     const scheduleNextGlitch = () => {
@@ -159,13 +136,15 @@ const CRTEffect = ({ children, isModern }) => {
 
     scheduleNextGlitch();
 
-    const animate = () => {
-      requestAnimationFrame(animate);
+    return () => {
+      if (glitchRef.current && glitchRef.current.stopGlitch) {
+        glitchRef.current.stopGlitch();
+      }
     };
+  }, [isModern]);
 
-    animate();
-
-    return () => {};
+  useEffect(() => {
+    glitchRef.current = glitch;
   }, [glitch]);
 
   if (isModern) {
@@ -173,16 +152,13 @@ const CRTEffect = ({ children, isModern }) => {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <CRTWrapper isModern={isModern}>
       <GlobalStyle />
-      {children}
-      <CRTEffectStyled>
-        <CRTCanvas ref={canvasRef} />
-        <CRTOverlay />
-        <RenderLine />
-        <GlitchContainer ref={glitch.ref} isGlitching={isGlitching} />
-      </CRTEffectStyled>
-    </div>
+      <CRTContent ref={glitch.ref}>
+        {children}
+      </CRTContent>
+      <Scanline />
+    </CRTWrapper>
   );
 };
 

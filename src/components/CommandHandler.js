@@ -9,6 +9,7 @@ import upgrade from '../commands/upgrade';
 import downgrade from '../commands/downgrade';
 import cd from '../commands/cd';
 import mkdir from '../commands/mkdir';
+import {easteregg, meaning} from '../commands/easteregg';
 
 const commands = {
   cat,
@@ -21,7 +22,9 @@ const commands = {
   upgrade,
   downgrade,
   cd,
-  mkdir
+  mkdir,
+  easteregg,
+  meaning
 };
 
 const commandHandler = (input) => {
