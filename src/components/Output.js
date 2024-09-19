@@ -27,6 +27,11 @@ const AnsiSpan = styled.span`
 `;
 
 const parseAnsiString = (str) => {
+  if (typeof str !== 'string') {
+    console.error('Expected string in parseAnsiString, got:', typeof str, str);
+    return [<AnsiSpan key={0}>{String(str)}</AnsiSpan>];
+  }
+
   // eslint-disable-next-line no-control-regex
   const regex = /\x1b\[[0-9;]*m/g;
   const parts = str.split(regex);

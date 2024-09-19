@@ -63,11 +63,9 @@ class FileSystem {
   }
 
   ensureDefaultFolder() {
-    if (!this.root.contents['default']) {
-      const defaultDir = new Directory('default', this.root);
-      initialFiles.forEach(file => defaultDir.addFile(new File(file.name, file.content)));
-      this.root.addDirectory(defaultDir);
-    }
+    const defaultDir = new Directory('default', this.root);
+    initialFiles.forEach(file => defaultDir.addFile(new File(file.name, file.content)));
+    this.root.addDirectory(defaultDir);
     this.saveToStorage();
   }
 
@@ -129,6 +127,19 @@ class FileSystem {
     return true;
   }
 
+  readDirectory(path) {
+    const dir = this.resolvePath(path).dir;
+    if (!dir) return null;
+
+    return Object.entries(dir.contents).map(([name, item]) => {
+      if (item instanceof Directory) {
+        return name + '/';
+      } else {
+        return name;
+      }
+    });
+  }
+
   makeDirectory(path) {
     const { dir, fileName } = this.resolvePath(path);
     if (!dir || dir.contents[fileName]) return false;
@@ -185,5 +196,6 @@ export const deleteFile = (path) => fileSystem.deleteFile(path);
 export const changeDirectory = (path) => fileSystem.changeDirectory(path);
 export const makeDirectory = (path) => fileSystem.makeDirectory(path);
 export const getCurrentPath = () => fileSystem.getCurrentPath();
+export const readDirectory = (path) => fileSystem.readDirectory(path);
 
 export default FileSystem;

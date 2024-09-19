@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import styled from 'styled-components';
-import { listFiles, getCurrentPath } from '../components/FileSystem';
+import { getCurrentPath, readDirectory } from '../components/FileSystem';
 
 const InputWrapper = styled.div`
   position: relative;
@@ -46,7 +46,8 @@ const Input = styled.input`
 `;
 
 const commands = [
-  'ls', 'cd', 'cat', 'clear', 'help', 'whoami', 'write', 'rm', 'mkdir', 'upgrade', 'downgrade'
+  'ls', 'cd', 'cat', 'clear', 'help', 'whoami', 'write', 'rm', 'mkdir', 'upgrade', 'downgrade',
+  'pwd', 'touch', 'echo', 'grep', 'head', 'tail', 'less', 'more', 'find', 'chmod', 'chown'
 ];
 
 const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
@@ -59,7 +60,6 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
 
   useImperativeHandle(ref, () => ({
     focus: () => {
-      // eslint-disable-next-line
       inputRef.current?.focus();
     }
   }));
@@ -83,11 +83,10 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
     updateAutocomplete(value);
   };
 
-  const updateAutocomplete = (value) => {
+  const updateAutocomplete = async (value) => {
     const [command, ...args] = value.split(' ');
     
     if (args.length === 0) {
-      // Command completion
       const matchingCommands = commands.filter(cmd => cmd.startsWith(command));
       if (matchingCommands.length === 1) {
         setGhostSuggestion(matchingCommands[0]);
@@ -95,18 +94,47 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
         setGhostSuggestion('');
       }
       setAutocompleteOptions(matchingCommands);
-    } else if ((command === 'ls' || command === 'cd' || command === 'cat') && args.length <= 1) {
-      // File/directory completion
+    } else if (['ls', 'cd', 'cat', 'rm', 'touch', 'mkdir', 'grep', 'find'].includes(command)) {
       const currentPath = getCurrentPath();
-      const files = listFiles(currentPath);
-      const partialArg = args[0] || '';
-      const matchingFiles = files.filter(file => file.startsWith(partialArg));
-      if (matchingFiles.length === 1) {
-        setGhostSuggestion(`${command} ${matchingFiles[0]}`);
+      const partialPath = args.join(' ').trim();
+      let fullPath;
+  
+      if (partialPath.startsWith('/')) {
+        fullPath = partialPath;
+      } else {
+        fullPath = `${currentPath}/${partialPath}`;
+      }
+      
+      fullPath = fullPath.replace(/\/+/g, '/');
+      
+      const lastSlashIndex = fullPath.lastIndexOf('/');
+      const dirPath = fullPath.substring(0, lastSlashIndex + 1);
+      const partial = fullPath.substring(lastSlashIndex + 1);
+  
+      const files = await readDirectory(dirPath);
+      if (files) {
+        const matchingFiles = files.filter(file => file.startsWith(partial));
+        if (matchingFiles.length === 1) {
+          let suggestion;
+          if (dirPath === currentPath + '/') {
+            const completedArg = args.slice(0, -1).concat(matchingFiles[0]).join(' ');
+            suggestion = `${command} ${completedArg}`.trim();
+          } else {
+            const relativePath = dirPath.startsWith(currentPath) 
+              ? dirPath.slice(currentPath.length) 
+              : dirPath;
+            suggestion = `${command} ${relativePath}${matchingFiles[0]}`.trim();
+          }
+          suggestion = suggestion.replace(/\/+/g, '/').trim(); // Normalize again
+          setGhostSuggestion(suggestion);
+        } else {
+          setGhostSuggestion('');
+        }
+        setAutocompleteOptions(matchingFiles);
       } else {
         setGhostSuggestion('');
+        setAutocompleteOptions([]);
       }
-      setAutocompleteOptions(matchingFiles);
     } else {
       setGhostSuggestion('');
       setAutocompleteOptions([]);
@@ -152,7 +180,6 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line
     inputRef.current?.focus();
   }, []);
 

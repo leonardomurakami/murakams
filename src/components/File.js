@@ -46,6 +46,37 @@ export const initialFiles = [
   
   Feel free to explore my files using the \`ls\` and \`cat\` commands!`),
   new File('projects.md', `Just like all my projects, this file is #TODO`),
+  new File('saved_email.txt', `From: it@murakams.com
+To: all-employees@company.com
+Subject: WHO OPENED POPUPS *INSIDE* OUR SERVERS???
+
+Dear Colleagues (if I can even call you that right now),
+
+I hope this email finds you well, AND THOROUGHLY ASHAMED!
+
+I've just spent the last 72 hours in a Kafka-esque nightmare, trying to figure out why our servers were running slower than a sloth swimming through molasses. And what did I discover? POPUPS. INSIDE THE SERVERS. I didn't even know that was possible!
+
+Someone (AND BELIEVE ME, I WILL UNCOVER YOUR IDENTITY) apparently thought it would be hilarious to open every single popup ad in existence... INSIDE. OUR. SERVERS. Our poor hardware is now more clogged than a drain at a barbershop!
+
+We've got flashing banners for discount mops in our RAM, spinning wheels promising free iPods in our CPUs, and a virtual used car salesman trying to sell a 1998 Honda Civic to our network switches. 
+
+Here's what's going to happen:
+
+1. The perpetrator will come forward. Not in an hour. Not after you've finished your popcorn. NOW.
+2. You will explain to me, in excruciating detail, how you managed to open popups inside a server. I'm equal parts furious and impressed.
+3. You will then close every. Single. Popup. By hand. Yes, even the ones that say "You can't close me! ;)"
+
+If no one confesses, I will be forced to assume it was a group effort, and I swear on all that is holy in Silicon Valley, I will replace our entire IT infrastructure with a room full of carrier pigeons and abacuses. Don't test me on this.
+
+Remember, I can see everything that happens on our network. I know who's been trying to download more gigahertz. It's only a matter of time before I trace these popups back to the source.
+
+In conclusion, our servers are for processing data, not for testing how many "Congratulations! You've won!" messages can fit in a CPU cache. That's what your personal phones are for.
+
+Exasperatedly yours,
+Your Friendly (but currently questioning reality) IT Department
+
+P.S. If anyone needs me, I'll be in the server room, trying to click the tiny 'x' on a popup selling beachfront property in Nebraska... that somehow appeared in our RAID controller.
+  `),
   new File('contact.json', JSON.stringify({
       email: "contato@murakams.com",
       linkedin: "https://linkedin.com/in/leonardo-murakami",

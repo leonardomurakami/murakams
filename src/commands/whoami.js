@@ -6,21 +6,24 @@ const whoamiContent = `
 ## Site Reliability Engineer
 
 - 🌐 Technology Enthusiast
-- 📊 Likes to dabble into Data Science and Machine Learning studies
-- 🐐 Studying goat farming 
+- 📊 Likes to dabble into general programming, technologies, etc. studies
+- 🐐 Studying goat farming (\`cat default/why-goat-farming.txt\`)
 
-### Skills
-- JavaScript (React, Node.js)
-- Python
-- SQL
-- DevOps
+### Skills (rating out of 5)
+- Go                          (****-)
+- Python                      (*****)
+- SQL                         (****-)
+- Kubernetes, Docker          (*****)
+- AWS, GCP                    (*****)
+- Terraform                   (*****)
+- JavaScript (React, Node.js) (**---)
 
 ### Contact
 - 📧 Email: contato@murakams.com
 - 🔗 LinkedIn: [linkedin.com/in/leonardo-murakami](https://linkedin.com/in/leonardo-murakami)
 - 🐙 GitHub: [github.com/leonardomurakami](https://github.com/leonardomurakami)
 
-Feel free to explore my projects using the \`ls\` and \`cat\` commands!
+Feel free to explore my (non-existent) projects using the \`ls\` and \`cat\` commands!
 `;
 
 const whoami = () => {

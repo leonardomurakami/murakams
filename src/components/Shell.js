@@ -4,6 +4,7 @@ import CommandLine from './CommandLine';
 import Output from './Output';
 import commandHandler from './CommandHandler';
 import CRTEffect from './CRTEffect';
+import RandomPopupGenerator from './PopupGenerator';
 
 const ShellContainer = styled.div`
   background: ${props => props.modern ? 'linear-gradient(45deg, rgba(26, 26, 26, 0.9), rgba(42, 42, 42, 0.9))' : 'rgba(0, 0, 0, 0.9)'};
@@ -31,7 +32,7 @@ const CommandLineContainer = styled.div`
 `;
 
 const Shell = () => {
-  const [output, setOutput] = useState([{ type: 'result', content: 'Welcome to the shell!\nType `help` to get help on available commands' }]);
+  const [output, setOutput] = useState([{ type: 'result', content: 'Welcome to Murakams enterprises server shell!\nType `help` to get help on available commands or `whoami` to see your current logged user!' }]);
   const [isModern, setIsModern] = useState(() => {
     const saved = localStorage.getItem('shellStyle');
     return saved !== null ? JSON.parse(saved) : false;
@@ -43,19 +44,25 @@ const Shell = () => {
     localStorage.setItem('shellStyle', JSON.stringify(isModern));
   }, [isModern]);
 
-  const handleCommand = useCallback((command) => {
+  const handleCommand = useCallback(async (command) => {
     const newOutput = [...output, { type: 'command', content: command }];
-    const result = commandHandler(command);
-    if (result && result.type === 'clear') {
-      setOutput([]);
-    } else if (result && result.type === 'upgrade') {
-      setIsModern(true);
-      setOutput([...newOutput, { type: 'result', content: 'Shell upgraded to modern style.' }]);
-    } else if (result && result.type === 'downgrade') {
-      setIsModern(false);
-      setOutput([...newOutput, { type: 'result', content: 'Shell downgraded to classic style.' }]);
-    } else {
-      setOutput([...newOutput, { type: 'result', content: result }]);
+    setOutput(newOutput);
+
+    try {
+      const result = await commandHandler(command);
+      if (result && result.type === 'clear') {
+        setOutput([]);
+      } else if (result && result.type === 'upgrade') {
+        setIsModern(true);
+        setOutput(prev => [...prev, { type: 'result', content: 'Shell upgraded to modern style.' }]);
+      } else if (result && result.type === 'downgrade') {
+        setIsModern(false);
+        setOutput(prev => [...prev, { type: 'result', content: 'Shell downgraded to classic style.' }]);
+      } else {
+        setOutput(prev => [...prev, { type: 'result', content: result }]);
+      }
+    } catch (error) {
+      setOutput(prev => [...prev, { type: 'result', content: `Error: ${error.message}` }]);
     }
   }, [output]);
 
@@ -66,12 +73,12 @@ const Shell = () => {
   }, [output]);
 
   const handleShellClick = useCallback((e) => {
-    // eslint-disable-next-line
     commandLineRef.current?.focus();
   }, []);
 
   return (
     <CRTEffect isModern={isModern}>
+      <RandomPopupGenerator />
       <ShellContainer 
         ref={shellContainerRef} 
         modern={isModern} 
