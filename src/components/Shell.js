@@ -32,7 +32,7 @@ const CommandLineContainer = styled.div`
 `;
 
 const Shell = () => {
-  const [output, setOutput] = useState([{ type: 'result', content: 'Welcome to Murakams enterprises server shell!\nType `help` to get help on available commands or `whoami` to see your current logged user!' }]);
+  const [output, setOutput] = useState([{ type: 'result', content: 'Welcome to Murakams Inc. central server!\nType `help` to get help on available commands or `whoami` to see your current logged user!\nAlso, please logout if you\'re not supposed to be here, this server isn\'t the most secure' }]);
   const [isModern, setIsModern] = useState(() => {
     const saved = localStorage.getItem('shellStyle');
     return saved !== null ? JSON.parse(saved) : false;
