@@ -1,3 +1,5 @@
+// WhoamiCommand.js
+import Command from './Command';
 import parseMarkdown from '../utils/markdownParser';
 
 const whoamiContent = `
@@ -26,8 +28,10 @@ const whoamiContent = `
 Feel free to explore my (non-existent) projects using the \`ls\` and \`cat\` commands!
 `;
 
-const whoami = () => {
-  return parseMarkdown(whoamiContent);
-};
+class WhoamiCommand extends Command {
+  execute(args) {
+    return parseMarkdown(whoamiContent);
+  }
+}
 
-export default whoami;
+export default WhoamiCommand;

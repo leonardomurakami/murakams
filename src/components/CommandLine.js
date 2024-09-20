@@ -1,6 +1,13 @@
-import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getCurrentPath, readDirectory } from '../components/FileSystem';
+import { getAutocompleteSuggestions } from '../redux/fileSystemSlice';
 
 const InputWrapper = styled.div`
   position: relative;
@@ -21,12 +28,13 @@ const InputOverlayWrapper = styled.div`
 
 const GhostInput = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  color: rgba(255, 255, 255, 0.3);
+  top: 1px;
+  left: 1px;
+  color: #0f0;
   pointer-events: none;
   white-space: pre;
   overflow: hidden;
+  display: flex;
 `;
 
 const Input = styled.input`
@@ -45,11 +53,6 @@ const Input = styled.input`
   }
 `;
 
-const commands = [
-  'ls', 'cd', 'cat', 'clear', 'help', 'whoami', 'write', 'rm', 'mkdir', 'upgrade', 'downgrade',
-  'pwd', 'touch', 'echo', 'grep', 'head', 'tail', 'less', 'more', 'find', 'chmod', 'chown'
-];
-
 const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   const [input, setInput] = useState('');
   const [ghostSuggestion, setGhostSuggestion] = useState('');
@@ -57,23 +60,45 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef(null);
+  const dispatch = useDispatch();
+  const currentPath = useSelector((state) => state.fileSystem.currentPath);
 
   useImperativeHandle(ref, () => ({
     focus: () => {
       inputRef.current?.focus();
-    }
+    },
   }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (input.trim()) {
       onCommand(input);
-      setHistory(prevHistory => [...prevHistory, input]);
+      setHistory((prevHistory) => [...prevHistory, input]);
       setHistoryIndex(-1);
       setInput('');
       setGhostSuggestion('');
       setAutocompleteOptions([]);
     }
+  };
+
+  const updateAutocomplete = async (value) => {
+    const suggestions = await dispatch(getAutocompleteSuggestions(value)).unwrap();
+
+    if (suggestions.length === 1) {
+      const tokens = value.trim().split(/\s+/);
+      const lastToken = tokens[tokens.length - 1] || '';
+      const suggestion = suggestions[0];
+
+      if (suggestion.startsWith(lastToken)) {
+        const completion = suggestion.slice(lastToken.length);
+        setGhostSuggestion(completion);
+      } else {
+        setGhostSuggestion('');
+      }
+    } else {
+      setGhostSuggestion('');
+    }
+    setAutocompleteOptions(suggestions);
   };
 
   const handleInputChange = (e) => {
@@ -83,80 +108,56 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
     updateAutocomplete(value);
   };
 
-  const updateAutocomplete = async (value) => {
-    const [command, ...args] = value.split(' ');
-    
-    if (args.length === 0) {
-      const matchingCommands = commands.filter(cmd => cmd.startsWith(command));
-      if (matchingCommands.length === 1) {
-        setGhostSuggestion(matchingCommands[0]);
-      } else {
-        setGhostSuggestion('');
-      }
-      setAutocompleteOptions(matchingCommands);
-    } else if (['ls', 'cd', 'cat', 'rm', 'touch', 'mkdir', 'grep', 'find'].includes(command)) {
-      const currentPath = getCurrentPath();
-      const partialPath = args.join(' ').trim();
-      let fullPath;
-  
-      if (partialPath.startsWith('/')) {
-        fullPath = partialPath;
-      } else {
-        fullPath = `${currentPath}/${partialPath}`;
-      }
-      
-      fullPath = fullPath.replace(/\/+/g, '/');
-      
-      const lastSlashIndex = fullPath.lastIndexOf('/');
-      const dirPath = fullPath.substring(0, lastSlashIndex + 1);
-      const partial = fullPath.substring(lastSlashIndex + 1);
-  
-      const files = await readDirectory(dirPath);
-      if (files) {
-        const matchingFiles = files.filter(file => file.startsWith(partial));
-        if (matchingFiles.length === 1) {
-          let suggestion;
-          if (dirPath === currentPath + '/') {
-            const completedArg = args.slice(0, -1).concat(matchingFiles[0]).join(' ');
-            suggestion = `${command} ${completedArg}`.trim();
-          } else {
-            const relativePath = dirPath.startsWith(currentPath) 
-              ? dirPath.slice(currentPath.length) 
-              : dirPath;
-            suggestion = `${command} ${relativePath}${matchingFiles[0]}`.trim();
-          }
-          suggestion = suggestion.replace(/\/+/g, '/').trim(); // Normalize again
-          setGhostSuggestion(suggestion);
-        } else {
-          setGhostSuggestion('');
-        }
-        setAutocompleteOptions(matchingFiles);
-      } else {
-        setGhostSuggestion('');
-        setAutocompleteOptions([]);
-      }
-    } else {
-      setGhostSuggestion('');
-      setAutocompleteOptions([]);
-    }
-  };
-
   const handleKeyDown = (e) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       if (ghostSuggestion) {
-        setInput(ghostSuggestion);
+        // Replace base in lastToken with the suggestion
+        const tokens = input.trim().split(/\s+/);
+        const lastToken = tokens[tokens.length - 1] || '';
+        const lastSlashIndex = lastToken.lastIndexOf('/');
+        let dir = '';
+        let base = lastToken;
+        if (lastSlashIndex !== -1) {
+          dir = lastToken.slice(0, lastSlashIndex + 1);
+          base = lastToken.slice(lastSlashIndex + 1);
+        }
+        tokens[tokens.length - 1] = dir + base + ghostSuggestion;
+        const newInput = tokens.join(' ');
+        setInput(newInput);
         setGhostSuggestion('');
+        updateAutocomplete(newInput);
       } else if (autocompleteOptions.length > 0) {
-        // Find common prefix among options
+        // Find common prefix among autocompleteOptions
+        const tokens = input.trim().split(/\s+/);
+        const lastToken = tokens[tokens.length - 1] || '';
+        const lastSlashIndex = lastToken.lastIndexOf('/');
+        let dir = '';
+        let base = lastToken;
+        if (lastSlashIndex !== -1) {
+          dir = lastToken.slice(0, lastSlashIndex + 1);
+          base = lastToken.slice(lastSlashIndex + 1);
+        }
+  
         const commonPrefix = autocompleteOptions.reduce((acc, curr) => {
+          const suggestionBase = curr.slice(dir.length);
           let i = 0;
-          while (i < acc.length && i < curr.length && acc[i] === curr[i]) i++;
+          while (
+            i < acc.length &&
+            i < suggestionBase.length &&
+            acc[i] === suggestionBase[i]
+          )
+            i++;
           return acc.slice(0, i);
-        });
-        if (commonPrefix.length > 0) {
-          const [command] = input.split(' ');
-          setInput(input.includes(' ') ? `${command} ${commonPrefix}` : commonPrefix);
+        }, autocompleteOptions[0].slice(dir.length));
+  
+        if (commonPrefix.length > base.length) {
+          tokens[tokens.length - 1] = dir + commonPrefix;
+          const newInput = tokens.join(' ');
+          setInput(newInput);
+          updateAutocomplete(newInput);
+        } else {
+          // No common prefix longer than base
         }
       }
     } else if (e.key === 'ArrowUp') {
@@ -183,19 +184,32 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
     inputRef.current?.focus();
   }, []);
 
+  const getPrompt = () => {
+    const user = 'user';
+    const host = 'murakams';
+    return `${user}@${host}:${currentPath}>`;
+  };
+
   return (
     <form onSubmit={handleSubmit}>
       <InputWrapper>
-        <Prompt>{modern ? '❯' : '$'}</Prompt>
+        <Prompt>{getPrompt()}</Prompt>
         <InputOverlayWrapper>
-          <GhostInput>{ghostSuggestion}</GhostInput>
+          <GhostInput>
+            <span>{input}</span>
+            <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>{ghostSuggestion}</span>
+          </GhostInput>
           <Input
             ref={inputRef}
             type="text"
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            style={{ fontFamily: modern ? "'Fira Code', 'Courier New', monospace" : "'Courier New', monospace" }}
+            style={{
+              fontFamily: modern
+                ? "'Fira Code', 'Courier New', monospace"
+                : "'Courier New', monospace",
+            }}
           />
         </InputOverlayWrapper>
       </InputWrapper>

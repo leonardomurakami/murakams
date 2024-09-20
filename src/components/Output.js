@@ -9,10 +9,12 @@ const OutputLine = styled.div`
 
 const CommandOutput = styled(OutputLine)`
   &::before {
-    content: '$ ';
+    content: '${props => props.prompt} ';
     color: #0f0;
   }
 `;
+
+const ResultOutput = styled(OutputLine)``;
 
 const colorMap = {
   '\x1b[0m': 'color: inherit;', // Reset
@@ -44,11 +46,9 @@ const parseAnsiString = (str) => {
   ));
 };
 
-const ResultOutput = styled(OutputLine)``;
-
-const Output = ({ type, content }) => {
+const Output = ({ type, content, prompt }) => {
   if (type === 'command') {
-    return <CommandOutput>{content}</CommandOutput>;
+    return <CommandOutput prompt={prompt}>{content}</CommandOutput>;
   } else {
     return <ResultOutput>{parseAnsiString(content)}</ResultOutput>;
   }
