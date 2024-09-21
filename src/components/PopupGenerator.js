@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import PopupWindow from './PopupWindow';
+import {
+  POPUP_INTERVAL,
+  MAX_POPUPS,
+  POPUP_PROBABILITY
+} from '../constants';
 
 const ContentContainer = styled.div`
   display: flex;
@@ -189,14 +194,14 @@ const RandomPopupGenerator = () => {
     }, []);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            if (Math.random() < 0.3 && popups.length < 5) {
-                createRandomPopup();
-            }
-        }, 5000);
+      const interval = setInterval(() => {
+          if (Math.random() < POPUP_PROBABILITY && popups.length < MAX_POPUPS) {
+              createRandomPopup();
+          }
+      }, POPUP_INTERVAL);
 
-        return () => clearInterval(interval);
-    }, [popups.length, createRandomPopup]);
+      return () => clearInterval(interval);
+  }, [popups.length, createRandomPopup]);
 
     const renderColoredText = useCallback((text) => {
         return text.split(/<color>|<\/color>/).map((part, index) => 
@@ -209,23 +214,23 @@ const RandomPopupGenerator = () => {
     }, []);
 
     return (
-        <>
-            {popups.map(popup => (
-                <PopupWindow
-                    key={popup.id}
-                    title={popup.title}
-                    initialPosition={popup.position}
-                    initialSize={popup.size}
-                    onClose={() => closePopup(popup.id)}
-                >
-                    <ContentContainer font={popup.font} imagePosition={popup.imagePosition}>
-                        <ContentImage src={popup.imageUrl} alt={popup.title} imagePosition={popup.imagePosition} />
-                        <ContentText>{renderColoredText(popup.content)}</ContentText>
-                    </ContentContainer>
-                </PopupWindow>
-            ))}
-        </>
-    );
+      <>
+          {popups.map(popup => (
+              <PopupWindow
+                  key={popup.id}
+                  title={popup.title}
+                  initialPosition={popup.position}
+                  initialSize={popup.size}
+                  onClose={() => closePopup(popup.id)}
+              >
+                  <ContentContainer font={popup.font} imagePosition={popup.imagePosition}>
+                      <ContentImage src={popup.imageUrl} alt={popup.title} imagePosition={popup.imagePosition} />
+                      <ContentText>{renderColoredText(popup.content)}</ContentText>
+                  </ContentContainer>
+              </PopupWindow>
+          ))}
+      </>
+  );
 };
 
 export default RandomPopupGenerator;

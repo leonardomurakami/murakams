@@ -1,8 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { DEFAULT_SHELL_STYLE } from '../constants';
 
 const initialState = {
   output: [{ type: 'result', content: 'Welcome to Murakams Inc. central server!\nType `help` to get help on available commands or `whoami` to see your current logged user!\nAlso, please logout if you\'re not supposed to be here, this server isn\'t the most secure' }],
-  isModern: JSON.parse(localStorage.getItem('shellStyle')) || false,
+  isModern: JSON.parse(localStorage.getItem('shellStyle')) || DEFAULT_SHELL_STYLE,
 };
 
 const shellSlice = createSlice({

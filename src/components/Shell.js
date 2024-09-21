@@ -6,11 +6,18 @@ import Output from './Output';
 import CRTEffect from './CRTEffect';
 import RandomPopupGenerator from './PopupGenerator';
 import { executeCommand } from '../redux/commandSlice';
+import {
+  BACKGROUND_COLOR,
+  MODERN_BACKGROUND,
+  TEXT_COLOR,
+  MODERN_FONT,
+  CLASSIC_FONT,
+} from '../constants';
 
 const ShellContainer = styled.div`
-  background: ${props => props.modern ? 'linear-gradient(45deg, rgba(26, 26, 26, 0.9), rgba(42, 42, 42, 0.9))' : 'rgba(0, 0, 0, 0.9)'};
-  color: #00ff00;
-  font-family: ${props => props.modern ? "'Fira Code', 'Courier New', monospace" : "'Courier New', monospace"};
+  background: ${props => props.modern ? MODERN_BACKGROUND : BACKGROUND_COLOR};
+  color: ${TEXT_COLOR};
+  font-family: ${props => props.modern ? MODERN_FONT : CLASSIC_FONT};
   height: 95vh;
   padding: 20px;
   overflow-y: auto;
@@ -35,7 +42,6 @@ const CommandLineContainer = styled.div`
 const Shell = () => {
   const { output, isModern } = useSelector(state => state.shell);
   const { status } = useSelector(state => state.command);
-  const currentPath = useSelector(state => state.fileSystem.currentPath);
   const dispatch = useDispatch();
   const shellContainerRef = useRef(null);
   const commandLineRef = useRef(null);
@@ -54,12 +60,6 @@ const Shell = () => {
     commandLineRef.current?.focus();
   }, []);
 
-  const getPrompt = useCallback(() => {
-    const user = 'user';
-    const host = 'murakams';
-    return `${user}@${host}:${currentPath}>`;
-  }, [currentPath]);
-
   return (
     <CRTEffect isModern={isModern}>
       <RandomPopupGenerator />
@@ -72,13 +72,12 @@ const Shell = () => {
           {output.map((item, index) => (
             <Output key={index} type={item.type} content={item.content} prompt={item.prompt} />
           ))}
-          {status === 'loading' && <Output type="result" content="Processing..." prompt={getPrompt()} />}
+          {status === 'loading' && <Output type="result" content="Processing..." />}
         </OutputContainer>
         <CommandLineContainer>
           <CommandLine 
             onCommand={handleCommand} 
             modern={isModern} 
-            prompt={getPrompt()}
             ref={commandLineRef}
           />
         </CommandLineContainer>

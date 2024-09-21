@@ -8,29 +8,40 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getAutocompleteSuggestions } from '../redux/fileSystemSlice';
+import {
+  PROMPT_COLOR,
+  TEXT_COLOR,
+  MODERN_FONT,
+  CLASSIC_FONT,
+  DEFAULT_USER,
+  DEFAULT_HOST,
+} from '../constants';
 
 const InputWrapper = styled.div`
-  position: relative;
   display: flex;
   align-items: center;
   padding-top: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 `;
 
 const Prompt = styled.span`
-  color: #0f0;
+  color: ${PROMPT_COLOR};
+  white-space: nowrap;
   margin-right: 8px;
 `;
 
 const InputOverlayWrapper = styled.div`
   position: relative;
-  width: 100%;
+  flex-grow: 1;
+  min-width: 0;
 `;
 
 const GhostInput = styled.div`
   position: absolute;
   top: 1px;
   left: 1px;
-  color: #0f0;
+  color: ${TEXT_COLOR};
   pointer-events: none;
   white-space: pre;
   overflow: hidden;
@@ -40,11 +51,11 @@ const GhostInput = styled.div`
 const Input = styled.input`
   background-color: transparent;
   border: none;
-  color: #0f0;
+  color: ${TEXT_COLOR};
   font-family: inherit;
   font-size: inherit;
   width: 100%;
-  caret-color: #0f0;
+  caret-color: ${TEXT_COLOR};
   caret-shape: block;
   position: relative;
   z-index: 1;
@@ -112,52 +123,55 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       if (ghostSuggestion) {
-        // Replace base in lastToken with the suggestion
-        const tokens = input.trim().split(/\s+/);
-        const lastToken = tokens[tokens.length - 1] || '';
+        const tokens = input.split(' ');
+        let lastToken = tokens[tokens.length - 1];
         const lastSlashIndex = lastToken.lastIndexOf('/');
-        let dir = '';
-        let base = lastToken;
         if (lastSlashIndex !== -1) {
-          dir = lastToken.slice(0, lastSlashIndex + 1);
-          base = lastToken.slice(lastSlashIndex + 1);
+          const pathPrefix = lastToken.substring(0, lastSlashIndex + 1);
+          const filenamePart = lastToken.substring(lastSlashIndex + 1);
+          lastToken = pathPrefix + filenamePart + ghostSuggestion;
+        } else {
+          lastToken += ghostSuggestion;
         }
-        tokens[tokens.length - 1] = dir + base + ghostSuggestion;
+        tokens[tokens.length - 1] = lastToken;
         const newInput = tokens.join(' ');
         setInput(newInput);
         setGhostSuggestion('');
         updateAutocomplete(newInput);
       } else if (autocompleteOptions.length > 0) {
-        // Find common prefix among autocompleteOptions
-        const tokens = input.trim().split(/\s+/);
-        const lastToken = tokens[tokens.length - 1] || '';
+        const tokens = input.split(' ');
+        let lastToken = tokens[tokens.length - 1];
         const lastSlashIndex = lastToken.lastIndexOf('/');
-        let dir = '';
-        let base = lastToken;
-        if (lastSlashIndex !== -1) {
-          dir = lastToken.slice(0, lastSlashIndex + 1);
-          base = lastToken.slice(lastSlashIndex + 1);
-        }
+        const pathPrefix = lastSlashIndex !== -1 ? lastToken.substring(0, lastSlashIndex + 1) : '';
+        const filenamePart = lastSlashIndex !== -1 ? lastToken.substring(lastSlashIndex + 1) : lastToken;
   
-        const commonPrefix = autocompleteOptions.reduce((acc, curr) => {
-          const suggestionBase = curr.slice(dir.length);
+        const relevantOptions = autocompleteOptions.map(option => {
+          const optionParts = option.split('/');
+          return optionParts[optionParts.length - 1];
+        });
+  
+        const commonPrefix = relevantOptions.reduce((acc, curr) => {
           let i = 0;
-          while (
-            i < acc.length &&
-            i < suggestionBase.length &&
-            acc[i] === suggestionBase[i]
-          )
-            i++;
+          while (i < acc.length && i < curr.length && acc[i] === curr[i]) i++;
           return acc.slice(0, i);
-        }, autocompleteOptions[0].slice(dir.length));
+        });
   
-        if (commonPrefix.length > base.length) {
-          tokens[tokens.length - 1] = dir + commonPrefix;
+        if (commonPrefix.length > filenamePart.length) {
+          lastToken = pathPrefix + commonPrefix;
+          tokens[tokens.length - 1] = lastToken;
+          const newInput = tokens.join(' ');
+          setInput(newInput);
+          updateAutocomplete(newInput);
+        } else if (autocompleteOptions.length === 1) {
+          // If there's only one option, use it
+          lastToken = pathPrefix + autocompleteOptions[0];
+          tokens[tokens.length - 1] = lastToken;
           const newInput = tokens.join(' ');
           setInput(newInput);
           updateAutocomplete(newInput);
         } else {
-          // No common prefix longer than base
+          // Multiple options, you might want to display them to the user
+          console.log('Multiple options:', autocompleteOptions);
         }
       }
     } else if (e.key === 'ArrowUp') {
@@ -185,9 +199,7 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   }, []);
 
   const getPrompt = () => {
-    const user = 'user';
-    const host = 'murakams';
-    return `${user}@${host}:${currentPath}>`;
+    return `${DEFAULT_USER}@${DEFAULT_HOST}:${currentPath}>`;
   };
 
   return (
@@ -206,9 +218,7 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             style={{
-              fontFamily: modern
-                ? "'Fira Code', 'Courier New', monospace"
-                : "'Courier New', monospace",
+              fontFamily: modern ? MODERN_FONT : CLASSIC_FONT,
             }}
           />
         </InputOverlayWrapper>
