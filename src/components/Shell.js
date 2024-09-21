@@ -57,6 +57,7 @@ const Shell = () => {
   }, [output]);
 
   const handleShellClick = useCallback((e) => {
+    // eslint-disable-next-line
     commandLineRef.current?.focus();
   }, []);
 

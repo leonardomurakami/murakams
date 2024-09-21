@@ -76,6 +76,7 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
 
   useImperativeHandle(ref, () => ({
     focus: () => {
+      // eslint-disable-next-line
       inputRef.current?.focus();
     },
   }));
@@ -195,6 +196,7 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     inputRef.current?.focus();
   }, []);
 

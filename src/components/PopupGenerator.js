@@ -121,6 +121,46 @@ const fakeAds = [
   {
     title: "Python: Now with Real Snakes!",
     content: "Upgrade your Python experience with our new Bio-Integrated Development Environment! Each function is executed by a real python snake. Watch in amazement as our serpentine coders slither through your algorithms. Comes with a comprehensive snake-handling course and a year's supply of mice. Disclaimer: Snakes may occasionally swallow important variables.",
+  },
+  {
+    title: "Blockchain Your Socks!",
+    content: "Tired of losing socks in the laundry? Our revolutionary SockChain technology ensures each sock is cryptographically paired with its mate. Use our distributed ledger to track your socks across multiple loads and machines. Never suffer from orphaned socks again! Warning: May cause your dryer to mine cryptocurrency.",
+  },
+  {
+    title: "AI-Powered Rubber Duck Debugging",
+    content: "Introducing DuckGPT, the world's first AI-powered rubber duck! This cutting-edge debugging assistant combines the timeless wisdom of rubber duck debugging with the power of machine learning. Features include empathetic quacking, context-aware waddles, and a built-in syntax highlighter. Floats in your bathtub AND your codebase!",
+  },
+  {
+    title: "Quantum Entangled Keyboards",
+    content: "Type faster than light with our Quantum Entangled Keyboards! Each keystroke instantly appears on your screen, no matter how far away you are. Perfect for remote work across galaxies. Caution: May cause temporal paradoxes if you type tomorrow's lottery numbers.",
+  },
+  {
+    title: "Machine Learning for Your Plants",
+    content: "Upgrade your green thumb with PlantNet, the AI that turns your garden into a self-improving ecosystem! Our neural networks optimize watering schedules, predict pest outbreaks, and even compose poetry inspired by your flowers. Side effects may include sentient tomatoes and philosophical debates with your cactus.",
+  },
+  {
+    title: "Serverless Toasters",
+    content: "Why should your bread care about infrastructure? Our Serverless Toasters use cloud-native heat distribution to ensure perfect toast every time. Scales automatically from bagels to baguettes. Comes with built-in error handling for burnt edges and a real-time crispness monitor.",
+  },
+  {
+    title: "Git Blame Insurance",
+    content: "Protect yourself from accidental pushes to production with Git Blame Insurance! Our comprehensive coverage includes alibi generation, commit message rewriting, and emergency branch creation. Don't let a single line of bad code ruin your career - insure your commits today!",
+  },
+  {
+    title: "The Agile Gym Membership",
+    content: "Revolutionize your fitness routine with our Agile Gym! We've replaced long-term goals with daily sprints, personal trainers with Scrum Masters, and water fountains with burndown charts. Achieve maximum gains through iterative workouts and continuous improvement. Remember, in our gym, every day is leg day!",
+  },
+  {
+    title: "CSS: Cryptographic Style Sheets",
+    content: "Secure your website's look and feel with Cryptographic Style Sheets! Each CSS rule is encrypted and can only be decrypted by authorized browsers. Features include: Man-in-the-middle-proof layouts, quantum-resistant color schemes, and blockchain-based responsive design. Make your styles as impenetrable as your backend!",
+  },
+  {
+    title: "Full-Stack Sandwich Artist Bootcamp",
+    content: "Become a Full-Stack Sandwich Artist in just 12 weeks! Learn end-to-end sandwich creation, from database design to user interface (crust). Master popular frameworks like Angular Lettuce and Vue.js (Vue.jus). Graduate with a portfolio full of delicious, responsive, and scalable sandwiches. Warning: May cause hunger-driven development.",
+  },
+  {
+    title: "Microservices for Your Microwave",
+    content: "Upgrade your kitchen with our Microservices Architecture for Microwaves! Each component of your meal is heated by a separate, specialized service. Includes automatic load balancing for even heat distribution and a service mesh for inter-food communication. Never suffer from a cold center and hot edges again!",
   }
 ];
 
