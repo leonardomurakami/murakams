@@ -1,42 +1,61 @@
-import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getCurrentPath, readDirectory } from '../components/FileSystem';
+import { getAutocompleteSuggestions } from '../redux/fileSystemSlice';
+import {
+  PROMPT_COLOR,
+  TEXT_COLOR,
+  MODERN_FONT,
+  CLASSIC_FONT,
+  DEFAULT_USER,
+  DEFAULT_HOST,
+} from '../constants';
 
 const InputWrapper = styled.div`
-  position: relative;
   display: flex;
   align-items: center;
   padding-top: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 `;
 
 const Prompt = styled.span`
-  color: #0f0;
+  color: ${PROMPT_COLOR};
+  white-space: nowrap;
   margin-right: 8px;
 `;
 
 const InputOverlayWrapper = styled.div`
   position: relative;
-  width: 100%;
+  flex-grow: 1;
+  min-width: 0;
 `;
 
 const GhostInput = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  color: rgba(255, 255, 255, 0.3);
+  top: 1px;
+  left: 1px;
+  color: ${TEXT_COLOR};
   pointer-events: none;
   white-space: pre;
   overflow: hidden;
+  display: flex;
 `;
 
 const Input = styled.input`
   background-color: transparent;
   border: none;
-  color: #0f0;
+  color: ${TEXT_COLOR};
   font-family: inherit;
   font-size: inherit;
   width: 100%;
-  caret-color: #0f0;
+  caret-color: ${TEXT_COLOR};
   caret-shape: block;
   position: relative;
   z-index: 1;
@@ -45,11 +64,6 @@ const Input = styled.input`
   }
 `;
 
-const commands = [
-  'ls', 'cd', 'cat', 'clear', 'help', 'whoami', 'write', 'rm', 'mkdir', 'upgrade', 'downgrade',
-  'pwd', 'touch', 'echo', 'grep', 'head', 'tail', 'less', 'more', 'find', 'chmod', 'chown'
-];
-
 const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   const [input, setInput] = useState('');
   const [ghostSuggestion, setGhostSuggestion] = useState('');
@@ -57,23 +71,46 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef(null);
+  const dispatch = useDispatch();
+  const currentPath = useSelector((state) => state.fileSystem.currentPath);
 
   useImperativeHandle(ref, () => ({
     focus: () => {
+      // eslint-disable-next-line
       inputRef.current?.focus();
-    }
+    },
   }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (input.trim()) {
       onCommand(input);
-      setHistory(prevHistory => [...prevHistory, input]);
+      setHistory((prevHistory) => [...prevHistory, input]);
       setHistoryIndex(-1);
       setInput('');
       setGhostSuggestion('');
       setAutocompleteOptions([]);
     }
+  };
+
+  const updateAutocomplete = async (value) => {
+    const suggestions = await dispatch(getAutocompleteSuggestions(value)).unwrap();
+
+    if (suggestions.length === 1) {
+      const tokens = value.trim().split(/\s+/);
+      const lastToken = tokens[tokens.length - 1] || '';
+      const suggestion = suggestions[0];
+
+      if (suggestion.startsWith(lastToken)) {
+        const completion = suggestion.slice(lastToken.length);
+        setGhostSuggestion(completion);
+      } else {
+        setGhostSuggestion('');
+      }
+    } else {
+      setGhostSuggestion('');
+    }
+    setAutocompleteOptions(suggestions);
   };
 
   const handleInputChange = (e) => {
@@ -83,80 +120,59 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
     updateAutocomplete(value);
   };
 
-  const updateAutocomplete = async (value) => {
-    const [command, ...args] = value.split(' ');
-    
-    if (args.length === 0) {
-      const matchingCommands = commands.filter(cmd => cmd.startsWith(command));
-      if (matchingCommands.length === 1) {
-        setGhostSuggestion(matchingCommands[0]);
-      } else {
-        setGhostSuggestion('');
-      }
-      setAutocompleteOptions(matchingCommands);
-    } else if (['ls', 'cd', 'cat', 'rm', 'touch', 'mkdir', 'grep', 'find'].includes(command)) {
-      const currentPath = getCurrentPath();
-      const partialPath = args.join(' ').trim();
-      let fullPath;
-  
-      if (partialPath.startsWith('/')) {
-        fullPath = partialPath;
-      } else {
-        fullPath = `${currentPath}/${partialPath}`;
-      }
-      
-      fullPath = fullPath.replace(/\/+/g, '/');
-      
-      const lastSlashIndex = fullPath.lastIndexOf('/');
-      const dirPath = fullPath.substring(0, lastSlashIndex + 1);
-      const partial = fullPath.substring(lastSlashIndex + 1);
-  
-      const files = await readDirectory(dirPath);
-      if (files) {
-        const matchingFiles = files.filter(file => file.startsWith(partial));
-        if (matchingFiles.length === 1) {
-          let suggestion;
-          if (dirPath === currentPath + '/') {
-            const completedArg = args.slice(0, -1).concat(matchingFiles[0]).join(' ');
-            suggestion = `${command} ${completedArg}`.trim();
-          } else {
-            const relativePath = dirPath.startsWith(currentPath) 
-              ? dirPath.slice(currentPath.length) 
-              : dirPath;
-            suggestion = `${command} ${relativePath}${matchingFiles[0]}`.trim();
-          }
-          suggestion = suggestion.replace(/\/+/g, '/').trim(); // Normalize again
-          setGhostSuggestion(suggestion);
-        } else {
-          setGhostSuggestion('');
-        }
-        setAutocompleteOptions(matchingFiles);
-      } else {
-        setGhostSuggestion('');
-        setAutocompleteOptions([]);
-      }
-    } else {
-      setGhostSuggestion('');
-      setAutocompleteOptions([]);
-    }
-  };
-
   const handleKeyDown = (e) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       if (ghostSuggestion) {
-        setInput(ghostSuggestion);
+        const tokens = input.split(' ');
+        let lastToken = tokens[tokens.length - 1];
+        const lastSlashIndex = lastToken.lastIndexOf('/');
+        if (lastSlashIndex !== -1) {
+          const pathPrefix = lastToken.substring(0, lastSlashIndex + 1);
+          const filenamePart = lastToken.substring(lastSlashIndex + 1);
+          lastToken = pathPrefix + filenamePart + ghostSuggestion;
+        } else {
+          lastToken += ghostSuggestion;
+        }
+        tokens[tokens.length - 1] = lastToken;
+        const newInput = tokens.join(' ');
+        setInput(newInput);
         setGhostSuggestion('');
+        updateAutocomplete(newInput);
       } else if (autocompleteOptions.length > 0) {
-        // Find common prefix among options
-        const commonPrefix = autocompleteOptions.reduce((acc, curr) => {
+        const tokens = input.split(' ');
+        let lastToken = tokens[tokens.length - 1];
+        const lastSlashIndex = lastToken.lastIndexOf('/');
+        const pathPrefix = lastSlashIndex !== -1 ? lastToken.substring(0, lastSlashIndex + 1) : '';
+        const filenamePart = lastSlashIndex !== -1 ? lastToken.substring(lastSlashIndex + 1) : lastToken;
+  
+        const relevantOptions = autocompleteOptions.map(option => {
+          const optionParts = option.split('/');
+          return optionParts[optionParts.length - 1];
+        });
+  
+        const commonPrefix = relevantOptions.reduce((acc, curr) => {
           let i = 0;
           while (i < acc.length && i < curr.length && acc[i] === curr[i]) i++;
           return acc.slice(0, i);
         });
-        if (commonPrefix.length > 0) {
-          const [command] = input.split(' ');
-          setInput(input.includes(' ') ? `${command} ${commonPrefix}` : commonPrefix);
+  
+        if (commonPrefix.length > filenamePart.length) {
+          lastToken = pathPrefix + commonPrefix;
+          tokens[tokens.length - 1] = lastToken;
+          const newInput = tokens.join(' ');
+          setInput(newInput);
+          updateAutocomplete(newInput);
+        } else if (autocompleteOptions.length === 1) {
+          // If there's only one option, use it
+          lastToken = pathPrefix + autocompleteOptions[0];
+          tokens[tokens.length - 1] = lastToken;
+          const newInput = tokens.join(' ');
+          setInput(newInput);
+          updateAutocomplete(newInput);
+        } else {
+          // Multiple options, you might want to display them to the user
+          console.log('Multiple options:', autocompleteOptions);
         }
       }
     } else if (e.key === 'ArrowUp') {
@@ -180,22 +196,32 @@ const CommandLine = forwardRef(({ onCommand, modern }, ref) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line
     inputRef.current?.focus();
   }, []);
+
+  const getPrompt = () => {
+    return `${DEFAULT_USER}@${DEFAULT_HOST}:${currentPath}>`;
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <InputWrapper>
-        <Prompt>{modern ? '❯' : '$'}</Prompt>
+        <Prompt>{getPrompt()}</Prompt>
         <InputOverlayWrapper>
-          <GhostInput>{ghostSuggestion}</GhostInput>
+          <GhostInput>
+            <span>{input}</span>
+            <span style={{ color: 'rgba(255, 255, 255, 0.3)' }}>{ghostSuggestion}</span>
+          </GhostInput>
           <Input
             ref={inputRef}
             type="text"
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            style={{ fontFamily: modern ? "'Fira Code', 'Courier New', monospace" : "'Courier New', monospace" }}
+            style={{
+              fontFamily: modern ? MODERN_FONT : CLASSIC_FONT,
+            }}
           />
         </InputOverlayWrapper>
       </InputWrapper>

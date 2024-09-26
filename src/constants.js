@@ -1,52 +1,40 @@
-class File {
-  constructor(name, content, createdAt = new Date(), modifiedAt = new Date()) {
-    this.name = name;
-    this.content = content;
-    this.createdAt = createdAt;
-    this.modifiedAt = modifiedAt;
-  }
+// File System Constants
+export const ROOT_PATH = '/';
+export const SYNCED_FOLDER_FILES = {
+    'welcome.txt': {
+        name: 'welcome.txt',
+        content: 'Welcome to my terminal portfolio! Type "help" to see available commands.',
+        isDirectory: false
+    },
+    'about.md': {
+        name: 'about.md',
+        content: `# About Me
+Hello! I'm Leonardo Murakami, a Site Reliability Engineer passionate about technology and always eager to learn new things.
 
-  toJSON() {
-    return {
-      name: this.name,
-      content: this.content,
-      createdAt: this.createdAt.toISOString(),
-      modifiedAt: this.modifiedAt.toISOString()
-    };
-  }
+## Skills
+- JavaScript (React, Node.js)
+- Python
+- Go
+- SQL
+- DevOps practices
+- AWS, K8s, Docker, Terraform
 
-  static fromJSON(json) {
-    return new File(
-      json.name,
-      json.content,
-      new Date(json.createdAt),
-      new Date(json.modifiedAt)
-    );
-  }
-}
-  
-export const initialFiles = [
-  new File('welcome.txt', 'Welcome to my terminal portfolio! Type "help" to see available commands.'),
-  new File('about.md', `# About Me
-  
-  Hello! I'm Leonardo Murakami, a Site Reliability Engineer passionate about technology and always eager to learn new things.
-  
-  ## Skills
-  - JavaScript (React, Node.js)
-  - Python
-  - Go
-  - SQL
-  - DevOps practices
-  - AWS, K8s, Docker, Terraform
-  
-  ## Interests
-  - 🌐 Technology Enthusiast
-  - 📊 Data Science and Machine Learning
-  - 🐐 Studying goat farming
-  
-  Feel free to explore my files using the \`ls\` and \`cat\` commands!`),
-  new File('projects.md', `Just like all my projects, this file is #TODO`),
-  new File('saved_email.txt', `From: it@murakams.com
+## Interests
+- 🌐 Technology Enthusiast
+- 📊 Data Science and Machine Learning
+- 🐐 Studying goat farming
+
+Feel free to explore my files using the \`ls\` and \`cat\` commands!`,
+        isDirectory: false
+    },
+    'projects.md': {
+        name: 'projects.md',
+        content: 'Just like all my projects, this file is #TODO',
+        isDirectory: false
+    },
+    'saved_email.txt': {
+        name: 'saved_email.txt',
+        content: `From: it@murakams.com
 To: all-employees@company.com
 Subject: WHO OPENED POPUPS *INSIDE* OUR SERVERS???
 
@@ -75,31 +63,46 @@ In conclusion, our servers are for processing data, not for testing how many "Co
 Exasperatedly yours,
 Your Friendly (but currently questioning reality) IT Department
 
-P.S. If anyone needs me, I'll be in the server room, trying to click the tiny 'x' on a popup selling beachfront property in Nebraska... that somehow appeared in our RAID controller.
-  `),
-  new File('contact.json', JSON.stringify({
-      email: "contato@murakams.com",
-      linkedin: "https://linkedin.com/in/leonardo-murakami",
-      github: "https://github.com/leonardomurakami"
-    }, null, 2)),
-  new File('skills.txt', `Technical Skills:
-  - Programming: JavaScript, Python, Go, SQL
-  - Web Technologies: React, Node.js, HTML, CSS (not so much)
-  - DevOps: Docker, Kubernetes, Jenkins
-  - Cloud Platforms: AWS, Google Cloud Platform (not so much)
-  - Monitoring: Prometheus, Grafana, ELK Stack
-  - Version Control: Git
-  - Databases: PostgreSQL, Redis, MariaDB/MySQL, MongoDB (not so much)
-  - Infrastructure as Code: Terraform, Ansible
-  - Operating Systems: Linux (Ubuntu, CentOS), macOS, Windows (lol)`),
-  new File('hobbies.md', `# Hobbies and Interests
-  1. 📚 Doomscrolling instagram reels
-  2. 🏋️ Gym and staying active
-  5. 🌱 Where is 3 and 4?
-  6. 🧘 Going insane over how to apply a CRT Effect to this website
-  7. 🎮 Occasional gaming to unwind
-  8. 🐐 Researching sustainable farming practices`),
-  new File('why-goat-farming.txt', `You don't have to monitor the utilization on a goat.
+P.S. If anyone needs me, I'll be in the server room, trying to click the tiny 'x' on a popup selling beachfront property in Nebraska... that somehow appeared in our RAID controller.`,
+        isDirectory: false
+    },
+    'contact.json': {
+        name: 'contact.json',
+        content: JSON.stringify({
+            email: "contato@murakams.com",
+            linkedin: "https://linkedin.com/in/leonardo-murakami",
+            github: "https://github.com/leonardomurakami"
+        }, null, 2),
+        isDirectory: false
+    },
+    'skills.txt': {
+        name: 'skills.txt',
+        content: `Technical Skills:
+- Programming: JavaScript, Python, Go, SQL
+- Web Technologies: React, Node.js, HTML, CSS (not so much)
+- DevOps: Docker, Kubernetes, Jenkins
+- Cloud Platforms: AWS, Google Cloud Platform (not so much)
+- Monitoring: Prometheus, Grafana, ELK Stack
+- Version Control: Git
+- Databases: PostgreSQL, Redis, MariaDB/MySQL, MongoDB (not so much)
+- Infrastructure as Code: Terraform, Ansible
+- Operating Systems: Linux (Ubuntu, CentOS), macOS, Windows (lol)`,
+        isDirectory: false
+    },
+    'hobbies.md': {
+        name: 'hobbies.md',
+        content: `# Hobbies and Interests
+1. 📚 Doomscrolling instagram reels
+2. 🏋️ Gym and staying active
+5. 🌱 Where is 3 and 4?
+6. 🧘 Going insane over how to apply a CRT Effect to this website
+7. 🎮 Occasional gaming to unwind
+8. 🐐 Researching sustainable farming practices`,
+        isDirectory: false
+    },
+    'why-goat-farming.txt': {
+        name: 'why-goat-farming.txt',
+        content: `You don't have to monitor the utilization on a goat.
 Milk a goat and the goat stays milked for a while.
 There are no 32-bit goats.
 You don't have to do a demo on a goat. And if you ever do, the goat will do what it's supposed to do and there's not a lot that can keep it from doing it.
@@ -216,9 +219,34 @@ Goats can't get there benefits revoked they are just made into goat steaks for d
 A goat farmer doesn't have to provide documentation on his goat's ablility to produce milk after the year 2000.
 GoatEng.
 Macintosh goat users will not make fun of you because your goat is more problematic & complicated than the goat they just bought.
-Goat farmers who voted for Perot have pretty much the same type of goat as everyone else, so they can go back to arguing about politics like they were doing before 1984.
-  `)
+Goat farmers who voted for Perot have pretty much the same type of goat as everyone else, so they can go back to arguing about politics like they were doing before 1984.`
+    }
+};
+
+// User Information
+export const DEFAULT_USER = 'user';
+export const DEFAULT_HOST = 'murakams';
+
+// Command List
+export const AVAILABLE_COMMANDS = [
+  'ls', 'cd', 'cat', 'pwd', 'mkdir', 'touch', 'rm', 'write', 'echo', 'grep',
+  'head', 'tail', 'find', 'help', 'clear', 'upgrade', 'downgrade', 'whoami'
 ];
-  
-  
-export default File;
+
+// Shell Style
+export const DEFAULT_SHELL_STYLE = false;
+
+// Colors
+export const PROMPT_COLOR = '#0f0';
+export const TEXT_COLOR = '#0f0';
+export const BACKGROUND_COLOR = 'rgba(0, 0, 0, 0.9)';
+export const MODERN_BACKGROUND = 'linear-gradient(45deg, rgba(26, 26, 26, 0.9), rgba(42, 42, 42, 0.9))';
+
+// Fonts
+export const MODERN_FONT = "'Fira Code', 'Courier New', monospace";
+export const CLASSIC_FONT = "'Courier New', monospace";
+
+// Popup Generator
+export const POPUP_INTERVAL = 5000;
+export const MAX_POPUPS = 5;
+export const POPUP_PROBABILITY = 0.3;

@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { PROMPT_COLOR } from '../constants';
 
 const OutputLine = styled.div`
   margin-bottom: 5px;
@@ -9,17 +10,19 @@ const OutputLine = styled.div`
 
 const CommandOutput = styled(OutputLine)`
   &::before {
-    content: '$ ';
-    color: #0f0;
+    content: '${props => props.prompt} ';
+    color: ${PROMPT_COLOR};
   }
 `;
 
+const ResultOutput = styled(OutputLine)``;
+
 const colorMap = {
-  '\x1b[0m': 'color: inherit;', // Reset
-  '\x1b[1m': 'font-weight: bold;', // Bold
-  '\x1b[1;33m': 'color: #FFFF00; font-weight: bold;', // Bold Yellow
-  '\x1b[1;36m': 'color: #00FFFF; font-weight: bold;', // Bold Cyan
-  '\x1b[1;32m': 'color: #00FF00; font-weight: bold;', // Bold Green
+  '\x1b[0m': 'color: inherit;',
+  '\x1b[1m': 'font-weight: bold;',
+  '\x1b[1;33m': 'color: #FFFF00; font-weight: bold;',
+  '\x1b[1;36m': 'color: #00FFFF; font-weight: bold;',
+  '\x1b[1;32m': 'color: #00FF00; font-weight: bold;',
 };
 
 const AnsiSpan = styled.span`
@@ -44,11 +47,9 @@ const parseAnsiString = (str) => {
   ));
 };
 
-const ResultOutput = styled(OutputLine)``;
-
-const Output = ({ type, content }) => {
+const Output = ({ type, content, prompt }) => {
   if (type === 'command') {
-    return <CommandOutput>{content}</CommandOutput>;
+    return <CommandOutput prompt={prompt}>{content}</CommandOutput>;
   } else {
     return <ResultOutput>{parseAnsiString(content)}</ResultOutput>;
   }

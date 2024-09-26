@@ -1,5 +1,9 @@
-const help = () => {
-  return `
+// HelpCommand.js
+import Command from './Command';
+
+class HelpCommand extends Command {
+  execute(args) {
+    return `
 Available commands:
   ls [path]                  - List files in the specified directory (default: current directory)
   cat <filename>             - Display the contents of a file
@@ -20,8 +24,6 @@ Available commands:
   less <filename>            - View file content with pagination
   more <filename>            - View file content with pagination
   find <path> -name <pattern> - Search for files in a directory hierarchy
-  chmod <mode> <file>        - Change file mode (simulated)
-  chown <owner> <file>       - Change file owner (simulated)
   help                       - Display this help message
 
 Special features:
@@ -42,6 +44,7 @@ Example usage:
   tail -n 10 log_file.txt
   find / -name "*.txt"
 `;
-};
+  }
+}
 
-export default help;
+export default HelpCommand;

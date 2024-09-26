@@ -1,66 +1,75 @@
-import cat from '../commands/cat';
-import ls from '../commands/ls';
-import whoami from '../commands/whoami';
-import write from '../commands/write';
-import rm from '../commands/rm';
-import help from '../commands/help';
-import clear from '../commands/clear';
-import upgrade from '../commands/upgrade';
-import downgrade from '../commands/downgrade';
-import cd from '../commands/cd';
-import mkdir from '../commands/mkdir';
-import {easteregg, meaning} from '../commands/easteregg';
-import pwd from '../commands/pwd';
-import touch from '../commands/touch';
-import echo from '../commands/echo';
-import grep from '../commands/grep';
-import head from '../commands/head';
-import tail from '../commands/tail';
-import less from '../commands/less';
-import more from '../commands/more';
-import find from '../commands/find';
-import { readFile, writeFile } from '../components/FileSystem';
+import CommandFactory from './CommandFactory';
+import { 
+  changeDirectory, 
+  readDirectory, 
+  readFile,
+  createFile,
+  createDirectory,
+  deleteNode,
+  updateFileContent
+} from '../redux/fileSystemSlice';
 
-const commands = {
-  cat, ls, whoami, write, rm, help, clear, upgrade, downgrade, cd, mkdir,
-  easteregg, meaning, pwd, touch, echo, grep, head, tail, less, more, find
-};
+const commandHandler = async (input, dispatch, getState) => {
+  const fileSystemActions = {
+    changeDirectory,
+    readDirectory,
+    readFile,
+    createFile,
+    createDirectory,
+    deleteNode,
+    updateFileContent
+  };
 
-const appendToFile = async (filename, content) => {
-  const existingContent = await readFile(filename);
-  const newContent = existingContent ? `${existingContent}\n${content}` : content;
-  await writeFile(filename, newContent);
-};
+  const commandFactory = new CommandFactory(fileSystemActions, dispatch, getState);
+  
+  // Split the input into command and arguments, considering quotes
+  const [command, ...args] = input.match(/(?:[^\s"]+|"[^"]*")+/g).map(arg => arg.replace(/^"(.*)"$/, '$1'));
 
-const commandHandler = async (input) => {
-  const redirectionIndex = input.indexOf('>>');
-  let command, outputFile;
+  // Check for redirection
+  const redirectIndex = args.findIndex(arg => arg === '>>' || arg === '>');
+  let redirectionType = null;
+  let redirectionFile = null;
 
-  if (redirectionIndex !== -1) {
-    command = input.slice(0, redirectionIndex).trim();
-    outputFile = input.slice(redirectionIndex + 2).trim();
-  } else {
-    command = input;
+  if (redirectIndex !== -1) {
+    redirectionType = args[redirectIndex];
+    redirectionFile = args[redirectIndex + 1];
+    args.splice(redirectIndex); // Remove redirection arguments
   }
 
-  const [commandName, ...args] = command.split(' ');
-  const commandFunction = commands[commandName.toLowerCase()];
+  try {
+    const cmd = commandFactory.getCommand(command);
+    let result = await cmd.execute(args);
 
-  if (commandFunction) {
-    try {
-      const result = await commandFunction(args);
+    if (redirectionType) {
+      const currentPath = getState().fileSystem.currentPath;
+      const fullPath = `${currentPath}/${redirectionFile}`.replace(/\/+/g, '/');
       
-      if (outputFile) {
-        await appendToFile(outputFile, result);
-        return ``;
-      } else {
-        return result;
+      if (typeof result === 'object' && result.content) {
+        result = result.content;
       }
-    } catch (error) {
-      return `Error: ${error.message}`;
+
+      if (redirectionType === '>>') {
+        // Append to file
+        const existingContent = await dispatch(readFile(fullPath)).unwrap() || '';
+        let newFileContent = { path: fullPath, content: existingContent + '\n' + result }
+        if (existingContent === ''){
+          newFileContent = { path: fullPath, content: result };
+        }
+        await dispatch(updateFileContent(newFileContent));
+      } else {
+        await dispatch(updateFileContent({ path: fullPath, content: result }));
+      }
+
+      result = `Output redirected to ${redirectionFile}`;
     }
-  } else {
-    return `Command not found: ${commandName}. Type 'help' for a list of available commands.`;
+
+    return result;
+  } catch (error) {
+    if (error.message.startsWith('Command not found')) {
+      return `Command not found: ${command}. Type 'help' for a list of available commands.`;
+    }
+    console.error(`Error executing command ${command}:`, error);
+    return `Error: ${error.message}`;
   }
 };
 
