@@ -230,7 +230,8 @@ export const DEFAULT_HOST = 'murakams';
 // Command List
 export const AVAILABLE_COMMANDS = [
   'ls', 'cd', 'cat', 'pwd', 'mkdir', 'touch', 'rm', 'write', 'echo', 'grep',
-  'head', 'tail', 'find', 'help', 'clear', 'upgrade', 'downgrade', 'whoami'
+  'head', 'tail', 'find', 'help', 'clear', 'upgrade', 'downgrade', 'whoami',
+  'changelog'
 ];
 
 // Shell Style

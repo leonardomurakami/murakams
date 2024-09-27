@@ -18,6 +18,7 @@ import HelpCommand from '../commands/HelpCommand';
 import ClearCommand from '../commands/ClearCommand';
 import UpgradeCommand from '../commands/UpgradeCommand';
 import DowngradeCommand from '../commands/DowngradeCommand';
+import ChangelogCommand from '../commands/ChangelogCommand';
 
 class CommandFactory {
     constructor(fileSystemActions, dispatch, getState) {
@@ -48,6 +49,7 @@ class CommandFactory {
       case 'clear': return new ClearCommand(this.fileSystemActions, this.dispatch, this.getState);
       case 'upgrade': return new UpgradeCommand(this.fileSystemActions, this.dispatch, this.getState);
       case 'downgrade': return new DowngradeCommand(this.fileSystemActions, this.dispatch, this.getState);
+      case 'changelog': return new ChangelogCommand(this.fileSystemActions, this.dispatch, this.getState);
       default:
         throw new Error(`Command not found: ${commandName}`);
     }

@@ -29,6 +29,7 @@ const Prompt = styled.span`
   color: ${PROMPT_COLOR};
   white-space: nowrap;
   margin-right: 8px;
+  margin-left: 8px;
 `;
 
 const InputOverlayWrapper = styled.div`

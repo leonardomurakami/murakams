@@ -5,9 +5,10 @@ class HelpCommand extends Command {
   execute(args) {
     return `
 Available commands:
+  whoami                     - Display information about the owner
+  changelog                  - Display the changelog
   ls [path]                  - List files in the specified directory (default: current directory)
   cat <filename>             - Display the contents of a file
-  whoami                     - Display information about the user
   write <filename> <content> - Create or overwrite a file with the specified content
   rm <filename>              - Delete the specified file
   clear                      - Clear the terminal screen
