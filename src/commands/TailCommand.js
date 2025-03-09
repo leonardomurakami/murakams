@@ -2,7 +2,9 @@ import Command from './Command';
 
 class TailCommand extends Command {
   async execute(args) {
-    if (args.length < 1) return 'Usage: tail [-n <num>] <filename>';
+    if (args.length < 1) {
+      return this.error('Usage: tail [-n <num>] <filename>', 2);
+    }
     
     let numLines = 10;
     let fileName;
@@ -14,14 +16,14 @@ class TailCommand extends Command {
       fileName = args[0];
     }
 
-    const currentPath = this.getState().fileSystem.currentPath;
-    const fullPath = `${currentPath}/${fileName}`.replace(/\/+/g, '/');
-    const content = await this.dispatch(this.fileSystemActions.readFile(fullPath)).unwrap();
+    const content = await this.dispatch(this.fileSystemActions.readFile(fileName)).unwrap();
     
-    if (content === null) return `File not found: ${fileName}`;
+    if (content === null) {
+      return this.error(`File not found: ${fileName}`, 1);
+    }
 
-    const lines = content.split('\n');
-    return lines.slice(-numLines).join('\n');
+    const lines = content.split('\n').slice(-numLines);
+    return this.success(lines.join('\n'));
   }
 }
 

@@ -2,7 +2,7 @@ import Command from './Command';
 
 class EchoCommand extends Command {
   execute(args) {
-    return args.join(' ');
+    return this.success(args.join(' '));
   }
 }
 

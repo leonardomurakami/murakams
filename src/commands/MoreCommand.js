@@ -1,14 +1,19 @@
 import Command from './Command';
 
 class MoreCommand extends Command {
-  execute(args) {
-    if (args.length === 0) return 'Usage: more <filename>';
+  async execute(args) {
+    if (args.length === 0) {
+      return this.error('Usage: more <filename>', 2);
+    }
+
     const fileName = args[0];
-    const content = this.fileSystem.readFile(fileName);
+    const content = await this.dispatch(this.fileSystemActions.readFile(fileName)).unwrap();
     
-    if (content === null) return `File not found: ${fileName}`;
+    if (content === null) {
+      return this.error(`File not found: ${fileName}`, 1);
+    }
     
-    return `Content of ${fileName}:\n\n${content}\n\n(Press 'q' to exit)`;
+    return this.success(`Content of ${fileName}:\n\n${content}\n\n(Press 'q' to exit)`);
   }
 }
 

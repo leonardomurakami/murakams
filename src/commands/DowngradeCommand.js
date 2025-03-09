@@ -3,7 +3,8 @@ import Command from './Command';
 class DowngradeCommand extends Command {
   execute(args) {
     return { 
-      type: 'downgrade', 
+      type: 'downgrade',
+      code: 0, 
       content: 'Shell downgraded to classic style.' 
     };
   }

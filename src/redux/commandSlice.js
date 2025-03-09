@@ -48,8 +48,13 @@ const commandSlice = createSlice({
   initialState: {
     status: 'idle',
     error: null,
+    history: [],
   },
-  reducers: {},
+  reducers: {
+    addToHistory: (state, action) => {
+      state.history.push(action.payload);
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(executeCommand.pending, (state) => {
@@ -69,4 +74,5 @@ const commandSlice = createSlice({
   },
 });
 
+export const { addToHistory } = commandSlice.actions;
 export default commandSlice.reducer;

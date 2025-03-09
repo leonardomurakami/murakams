@@ -1,70 +1,83 @@
-# Getting Started with Create React App
+# Murakams Terminal Website
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A retro terminal-style personal website with interactive commands, filesystem simulation, and nostalgic Windows 98-style popups. Live at [murakams.com](https://murakams.com).
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Full terminal emulation with 20+ Unix-like commands
+- Persistent virtual filesystem with file operations
+- Command history and tab completion
+- CRT screen effect with scanlines and RGB shift
+- Windows 98-style popup windows
+- Toggleable modern/classic UI modes
 
-### `npm start`
+## Commands
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Core commands include:
+```bash
+ls          # List directory contents
+cat         # View file contents
+cd          # Change directory
+write       # Create/edit files
+rm          # Remove files
+whoami      # View profile information
+help        # List all available commands
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Use `help` for the complete command list.
 
-### `npm test`
+## Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- React
+- Redux Toolkit for state management
+- Styled Components for styling
+- React-PowerGlitch for CRT effects
+- React-Rnd for draggable windows
 
-### `npm run build`
+## Development
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Clone the repository:
+```bash
+git clone https://github.com/leonardomurakami/murakams
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+2. Install dependencies:
+```bash
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3. Start development server:
+```bash
+npm start
+```
 
-### `npm run eject`
+## Project Structure
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```
+src/
+  ├── components/      # React components
+  ├── commands/        # Terminal command implementations
+  ├── redux/          # Redux store and slices
+  ├── constants/      # Global constants
+  └── utils/          # Helper functions
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Core Components
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- `Shell.js`: Main terminal interface
+- `CommandLine.js`: Command input handling
+- `FileSystem.js`: Virtual filesystem management
+- `CRTEffect.js`: Retro display effects
+- `PopupWindow.js`: Windows 98-style windows
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Contributing
 
-## Learn More
+Feel free to submit issues and pull requests.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## License
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+MIT License
 
-### Code Splitting
+## Author
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Leonardo Murakami - [GitHub](https://github.com/leonardomurakami) | [LinkedIn](https://linkedin.com/in/leonardo-murakami)

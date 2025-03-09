@@ -1,8 +1,9 @@
 import Command from './Command';
 
 class PwdCommand extends Command {
-  execute() {
-    return this.getState().fileSystem.currentPath;
+  execute(args) {
+    const currentPath = this.getState().fileSystem.currentPath;
+    return this.success(currentPath);
   }
 }
 

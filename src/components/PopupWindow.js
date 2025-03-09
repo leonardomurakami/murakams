@@ -17,13 +17,14 @@ const WindowContainer = styled.div`
 `;
 
 const TitleBar = styled.div`
-  background-color: #000080;
+  background-color: ${props => props.isActive ? '#000080' : '#808080'};
   color: white;
   padding: 2px 3px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   user-select: none;
+  cursor: move;
 `;
 
 const TitleText = styled.span`
@@ -51,6 +52,7 @@ const TitleButton = styled.button`
   align-items: center;
   justify-content: center;
   color: black;
+  cursor: pointer;
 
   &:active {
     border-top-color: #808080;
@@ -65,7 +67,7 @@ const TitleButton = styled.button`
 `;
 
 const ContentArea = styled.div`
-  padding: 8px;
+  padding: 0px;
   overflow-y: auto;
   flex-grow: 1;
   background-color: #008080;
@@ -93,57 +95,24 @@ const ContentArea = styled.div`
   }
 `;
 
-
 const ContentWrapper = styled.div`
   text-align: center;
 `;
 
-const ClickButton = styled.button`
-  background-color: #c0c0c0;
-  border: 2px solid;
-  border-top-color: #dfdfdf;
-  border-left-color: #dfdfdf;
-  border-right-color: #808080;
-  border-bottom-color: #808080;
-  color: black;
-  font-weight: bold;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-family: 'MS Sans Serif', Arial, sans-serif;
-  margin-top: 10px;
-
-  &:active {
-    border-top-color: #808080;
-    border-left-color: #808080;
-    border-right-color: #dfdfdf;
-    border-bottom-color: #dfdfdf;
-  }
-
-  &:focus {
-    outline: none;
-  }
-`;
-
-const PopupWindow = ({ children, title, initialPosition, initialSize, onClose }) => {
+const PopupWindow = ({ children, title, initialPosition, initialSize, onClose, zIndex, onFocus }) => {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const contentRef = useRef(null);
+  const windowRef = useRef(null);
 
   const handleMaximize = () => {
     setIsMaximized(!isMaximized);
   };
 
   const handleMouseDown = useCallback((e) => {
-    const contentElement = contentRef.current;
-    if (contentElement) {
-      const { clientWidth, clientHeight, offsetWidth, offsetHeight } = contentElement;
-      const isOnScrollbarX = e.clientY > clientHeight && e.clientY <= offsetHeight;
-      const isOnScrollbarY = e.clientX > clientWidth && e.clientX <= offsetWidth;
-
-      if (isOnScrollbarX || isOnScrollbarY) {
-        e.stopPropagation();
-      }
-    }
-  }, []);
+    setIsActive(true);
+    onFocus?.();
+  }, [onFocus]);
 
   const handleWheel = useCallback((e) => {
     const contentElement = contentRef.current;
@@ -163,6 +132,19 @@ const PopupWindow = ({ children, title, initialPosition, initialSize, onClose })
     }
   }, [handleWheel]);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (windowRef.current && !windowRef.current.contains(e.target)) {
+        setIsActive(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <Rnd
       default={{
@@ -174,15 +156,15 @@ const PopupWindow = ({ children, title, initialPosition, initialSize, onClose })
       minWidth={200}
       minHeight={100}
       bounds="window"
-      style={{ zIndex: 1000 }}
+      style={{ zIndex }}
       disableDragging={isMaximized}
       enableResizing={!isMaximized}
       size={isMaximized ? { width: '100%', height: '100%' } : undefined}
       position={isMaximized ? { x: 0, y: 0 } : undefined}
       dragHandleClassName="drag-handle"
     >
-      <WindowContainer>
-        <TitleBar className="drag-handle">
+      <WindowContainer ref={windowRef} onMouseDown={handleMouseDown}>
+        <TitleBar className="drag-handle" isActive={isActive}>
           <TitleText>{title}</TitleText>
           <ButtonGroup>
             <TitleButton onClick={onClose}>_</TitleButton>
@@ -190,13 +172,9 @@ const PopupWindow = ({ children, title, initialPosition, initialSize, onClose })
             <TitleButton onClick={onClose}>X</TitleButton>
           </ButtonGroup>
         </TitleBar>
-        <ContentArea
-          ref={contentRef}
-          onMouseDown={handleMouseDown}
-        >
+        <ContentArea ref={contentRef}>
           <ContentWrapper>
             {children}
-            <ClickButton onClick={onClose}>Click Here!</ClickButton>
           </ContentWrapper>
         </ContentArea>
       </WindowContainer>

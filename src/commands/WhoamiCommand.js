@@ -1,4 +1,3 @@
-// WhoamiCommand.js
 import Command from './Command';
 import parseMarkdown from '../utils/markdownParser';
 
@@ -9,7 +8,7 @@ const whoamiContent = `
 
 - 🌐 Technology Enthusiast
 - 📊 Likes to dabble into general programming, technologies, etc. studies
-- 🐐 Studying goat farming (\`cat default/why-goat-farming.txt\`)
+- 🐐 Studying goat farming (\`cat synced/why-goat-farming.txt\`)
 
 ### Skills (rating out of 5)
 - Go                          (****-)
@@ -30,7 +29,7 @@ Feel free to explore my (non-existent) projects using the \`ls\` and \`cat\` com
 
 class WhoamiCommand extends Command {
   execute(args) {
-    return parseMarkdown(whoamiContent);
+    return this.success(parseMarkdown(whoamiContent));
   }
 }
 

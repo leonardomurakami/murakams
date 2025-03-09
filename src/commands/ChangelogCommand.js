@@ -1,4 +1,3 @@
-// WhoamiCommand.js
 import Command from './Command';
 
 const changelogContent = `
@@ -25,11 +24,19 @@ const changelogContent = `
 - Added more commands
 - Fixed a bunch of bugs
 - Improved code efficiency
+
+[18/11/2024]
+- Added a proper portfolio page
+- Added proper return codes to commands
+- Implemented command chaining (&&, ||)
+- Added pipe support (|)
+- Enhanced error handling
+- Added history expansion operators (!!, !1, !-1, !)
 `;
 
 class ChangelogCommand extends Command {
   execute(args) {
-    return changelogContent;
+    return this.success(changelogContent);
   }
 }
 

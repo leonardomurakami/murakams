@@ -1,9 +1,6 @@
-// HelpCommand.js
 import Command from './Command';
 
-class HelpCommand extends Command {
-  execute(args) {
-    return `
+const helpText = `
 Available commands:
   whoami                     - Display information about the owner
   changelog                  - Display the changelog
@@ -29,22 +26,21 @@ Available commands:
 
 Special features:
   >> : Output redirection (append)
-    Example: echo "Hello" >> file.txt
+  >  : Output redirection (overwrite)
+  |  : Pipe output to next command
+  && : Execute next command only if current succeeds
+  || : Execute next command only if current fails
 
-Example usage:
-  ls /documents
-  cat /documents/note.txt
-  write /documents/new_note.txt This is a new note.
-  rm /documents/old_note.txt
-  cd /documents
-  pwd
-  touch new_file.txt
-  echo Hello, World!
-  grep "important" note.txt
-  head -n 5 long_file.txt
-  tail -n 10 log_file.txt
-  find / -name "*.txt"
+Return codes:
+  0: Success
+  1: General error
+  2: Usage error
+  127: Command not found
 `;
+
+class HelpCommand extends Command {
+  execute(args) {
+    return this.success(helpText);
   }
 }
 

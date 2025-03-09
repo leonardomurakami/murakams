@@ -35,6 +35,32 @@ const ContentImage = styled.img`
   }};
 `;
 
+const ClickButton = styled.button`
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-top-color: #dfdfdf;
+  border-left-color: #dfdfdf;
+  border-right-color: #808080;
+  border-bottom-color: #808080;
+  color: black;
+  font-weight: bold;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-family: 'MS Sans Serif', Arial, sans-serif;
+  margin-top: 10px;
+
+  &:active {
+    border-top-color: #808080;
+    border-left-color: #808080;
+    border-right-color: #dfdfdf;
+    border-bottom-color: #dfdfdf;
+  }
+
+  &:focus {
+    outline: none;
+  }
+`;
+
 const ColoredSpan = styled.span`
   color: ${props => props.color};
 `;
@@ -194,7 +220,9 @@ const funFonts = [
 ];
 
 const RandomPopupGenerator = () => {
-    const [popups, setPopups] = useState([]);
+  const [popups, setPopups] = useState([]);
+  const [maxZIndex, setMaxZIndex] = useState(1000);
+
 
     const colorWords = useCallback((content) => {
         return content.split(' ').map(word => 
@@ -225,9 +253,11 @@ const RandomPopupGenerator = () => {
                 width: 400 + Math.random() * 100,
                 height: 200 + Math.random() * 100,
             },
+            zIndex: maxZIndex + 1
         };
+        setMaxZIndex(prev => prev + 1);
         setPopups(prevPopups => [...prevPopups, newPopup]);
-    }, [colorWords]);
+    }, [colorWords, maxZIndex]);
 
     const closePopup = useCallback((id) => {
         setPopups(prevPopups => prevPopups.filter(popup => popup.id !== id));
@@ -253,7 +283,17 @@ const RandomPopupGenerator = () => {
         );
     }, []);
 
-    return (
+    const handleFocus = (id) => {
+      setMaxZIndex(prev => prev + 1);
+      setPopups(prevPopups => 
+          prevPopups.map(popup => ({
+              ...popup,
+              zIndex: popup.id === id ? maxZIndex + 1 : popup.zIndex
+          }))
+      );
+  };
+
+  return (
       <>
           {popups.map(popup => (
               <PopupWindow
@@ -262,10 +302,13 @@ const RandomPopupGenerator = () => {
                   initialPosition={popup.position}
                   initialSize={popup.size}
                   onClose={() => closePopup(popup.id)}
+                  zIndex={popup.zIndex || 1000}
+                  onFocus={() => handleFocus(popup.id)}
               >
                   <ContentContainer font={popup.font} imagePosition={popup.imagePosition}>
                       <ContentImage src={popup.imageUrl} alt={popup.title} imagePosition={popup.imagePosition} />
                       <ContentText>{renderColoredText(popup.content)}</ContentText>
+                      <ClickButton onClick={() => closePopup(popup.id)}>Click Here!</ClickButton>
                   </ContentContainer>
               </PopupWindow>
           ))}

@@ -2,7 +2,9 @@ import Command from './Command';
 
 class FindCommand extends Command {
   async execute(args) {
-    if (args.length < 1) return 'Usage: find [path] [-name pattern]';
+    if (args.length < 1) {
+      return this.error('Usage: find [path] [-name pattern]', 2);
+    }
 
     let path = this.getState().fileSystem.currentPath;
     let namePattern = null;
@@ -16,7 +18,7 @@ class FindCommand extends Command {
     }
 
     const results = await this.findRecursive(path, namePattern);
-    return results.length > 0 ? results.join('\n') : 'No files found';
+    return this.success(results.length > 0 ? results.join('\n') : 'No files found');
   }
 
   async findRecursive(path, namePattern) {

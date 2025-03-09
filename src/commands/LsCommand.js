@@ -11,9 +11,12 @@ class LsCommand extends Command {
       else if (arg === '-l') longFormat = true;
       else path = arg;
     });
+
     const files = await this.dispatch(this.fileSystemActions.readDirectory(path)).unwrap();
 
-    if (!files) return `Directory not found: ${path}`;
+    if (!files) {
+      return this.error(`Directory not found: ${path}`, 1);
+    }
 
     let output = files
       .filter(file => showHidden || !file.startsWith('.'))
@@ -33,10 +36,8 @@ class LsCommand extends Command {
         }
         return file;
       });
-    if (output.length > 0){
-        return output.join('\n');
-    }
-    return ' ';
+
+    return this.success(output.length > 0 ? output.join('\n') : ' ');
   }
 }
 

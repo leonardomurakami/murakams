@@ -24,7 +24,7 @@ Hello! I'm Leonardo Murakami, a Site Reliability Engineer passionate about techn
 - 📊 Data Science and Machine Learning
 - 🐐 Studying goat farming
 
-Feel free to explore my files using the \`ls\` and \`cat\` commands!`,
+Feel free to explore my files using the \`ls\`, \`cat\` and other common unix commands!`,
         isDirectory: false
     },
     'projects.md': {

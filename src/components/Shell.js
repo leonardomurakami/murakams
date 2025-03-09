@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import CommandLine from './CommandLine';
 import Output from './Output';
 import CRTEffect from './CRTEffect';
+import InfoPopup from './InfoPopup';
 import RandomPopupGenerator from './PopupGenerator';
 import { executeCommand } from '../redux/commandSlice';
 import {
@@ -15,6 +16,7 @@ import {
 } from '../constants';
 
 const ShellContainer = styled.div`
+  position: relative;
   background: ${props => props.modern ? MODERN_BACKGROUND : BACKGROUND_COLOR};
   color: ${TEXT_COLOR};
   font-family: ${props => props.modern ? MODERN_FONT : CLASSIC_FONT};
@@ -64,6 +66,7 @@ const Shell = () => {
   return (
     <CRTEffect isModern={isModern}>
       <RandomPopupGenerator />
+      <InfoPopup />
       <ShellContainer 
         ref={shellContainerRef} 
         modern={isModern} 
